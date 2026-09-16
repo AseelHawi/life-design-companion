@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Life Design Companion</title>
+<style>
+:root{--ink:#26343d;--muted:#6c7880;--line:#dce3e6;--bg:#f6f8f9;--card:#fff;--accent:#5f9ea0;--soft:#e8f3f4;--gold:#d9a441}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:900px;margin:auto;padding:16px 14px 42px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+h1{font-size:25px;margin:0 0 3px}.sub{font-size:13px;color:var(--muted);line-height:1.4}.tabs{display:flex;gap:7px;overflow:auto;padding:3px 0 10px}
+button{min-height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);padding:9px 13px;font:inherit;font-weight:650;cursor:pointer}
+button.primary,.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}.screen{display:none}.screen.show{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+h2{font-size:19px;margin:0 0 5px}h3{font-size:15px;margin:17px 0 6px}.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+label{display:block;font-size:13px;font-weight:650;margin-bottom:10px}input,select,textarea{display:block;width:100%;margin-top:5px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;padding:11px}
+textarea{min-height:95px;resize:vertical}.entry{border-top:1px solid var(--line);padding:13px 0}.entry:first-child{border-top:0}.pill{display:inline-block;background:var(--soft);border-radius:999px;padding:4px 8px;font-size:12px;margin-left:5px}.muted{color:var(--muted);font-size:13px}
+.metric{display:flex;justify-content:space-between;align-items:end}.big{font-size:27px;font-weight:750}.bar{height:8px;background:#edf1f2;border-radius:8px;overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--accent)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.danger{color:#9a4141}.notice{background:var(--soft);border-radius:11px;padding:11px;font-size:13px;line-height:1.45}
+@media(max-width:600px){.grid,.grid3{grid-template-columns:1fr}.app{padding:13px 10px 30px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<div class="top"><div><h1>Life Design Companion</h1><div class="sub">Observe → notice patterns → reflect → prototype → learn.</div></div><button id="backupBtn">Backup</button></div>
+
+<div class="tabs">
+<button class="tab active" data-screen="today">Today</button>
+<button class="tab" data-screen="journal">Journal</button>
+<button class="tab" data-screen="dashboard">Patterns</button>
+<button class="tab" data-screen="experiments">Experiments</button>
+<button class="tab" data-screen="design">Design</button>
+</div>
+
+<section id="today" class="screen show">
+<div class="card">
+<h2>Quick observation</h2><p class="hint">This should take less than a minute. Don't analyze too much—capture what actually happened.</p>
+<form id="quickForm">
+<div class="grid">
+<label>Date<input id="qDate" type="date" required></label>
+<label>Activity<input id="qActivity" placeholder="What were you doing?" required></label>
+<label>Energy<input id="qEnergy" type="number" min="0" max="10" value="5"></label>
+<label>Engagement<input id="qEngagement" type="number" min="0" max="10" value="5"></label>
+</div>
+<label>What affected the experience?<textarea id="qWhy" placeholder="People, place, pace, challenge, autonomy, meaning, stress, etc."></textarea></label>
+<button class="primary">Save observation</button>
+</form>
+</div>
+<div class="card"><h2>Today</h2><div id="todayStats" class="grid3"></div></div>
+<div class="notice">The goal isn't to manufacture a perfect life. You're collecting evidence about what gives you energy, what engages you, and what conditions matter.</div>
+</section>
+
+<section id="journal" class="screen">
+<div class="card">
+<h2>Good Time Journal</h2><p class="hint">For a more detailed entry, record context and tags in addition to energy and engagement.</p>
+<form id="journalForm">
+<div class="grid">
+<label>Date<input id="jDate" type="date" required></label>
+<label>Activity<input id="jActivity" required></label>
+<label>Context<input id="jContext" placeholder="People / place / circumstances"></label>
+<label>Hours<input id="jHours" type="number" min="0" step=".25"></label>
+<label>Energy<input id="jEnergy" type="number" min="0" max="10" value="5"></label>
+<label>Engagement<input id="jEngagement" type="number" min="0" max="10" value="5"></label>
+</div>
+<label>Observation<textarea id="jWhy"></textarea></label>
+<label>Tags<input id="jTags" placeholder="outdoors, creative, social, routine"></label>
+<button class="primary">Add to journal</button>
+</form>
+</div>
+<div class="card"><h2>Recent observations</h2><div id="journalList"></div></div>
+</section>
+
+<section id="dashboard" class="screen">
+<div class="card">
+<h2>Patterns</h2><p class="hint">This is intentionally simple. As your journal grows, these averages become useful clues rather than judgments.</p>
+<div id="overallStats" class="grid3"></div>
+</div>
+<div class="card"><h2>Energy by activity</h2><div id="activityPatterns"></div></div>
+<div class="card"><h2>Work · Play · Love · Health</h2><p class="hint">Rate these periodically to notice where you feel aligned or constrained.</p>
+<form id="areaForm">
+<div class="grid">
+<label>Date<input id="aDate" type="date" required></label>
+<label>Area<select id="aArea"><option>Work</option><option>Play</option><option>Love</option><option>Health</option></select></label>
+<label>Rating<input id="aRating" type="number" min="0" max="10" value="5"></label>
+<label>Trend<select id="aTrend"><option>Stable</option><option>Improving</option><option>Declining</option><option>Unclear</option></select></label>
+</div>
+<label>What's working?<textarea id="aWorking"></textarea></label>
+<label>What's constrained?<textarea id="aConstraint"></textarea></label>
+<button class="primary">Save area check-in</button>
+</form>
+<div id="areaList"></div>
+</div>
+</section>
+
+<section id="experiments" class="screen">
+<div class="card">
+<h2>Prototype Lab</h2><p class="hint">When a possibility interests you, don't immediately commit. Design a small experiment that can teach you something.</p>
+<form id="experimentForm">
+<label>Possibility<input id="ePossibility" placeholder="Something you're curious about" required></label>
+<label>Experiment<textarea id="eExperiment" placeholder="A conversation, observation, class, shadowing, volunteer shift, side project, etc."></textarea></label>
+<label>What happened?<textarea id="eResult"></textarea></label>
+<label>What did I learn?<textarea id="eLearned"></textarea></label>
+<label>Next step<input id="eNext"></label>
+<button class="primary">Save experiment</button>
+</form>
+</div>
+<div class="card"><h2>Experiments</h2><div id="experimentList"></div></div>
+</section>
+
+<section id="design" class="screen">
+<div class="card">
+<h2>Design Studio</h2><p class="hint">Keep the deeper exercises here. Your answers save automatically in this browser.</p>
+<div id="designFields"></div>
+</div>
+</section>
+
+<input id="importFile" type="file" accept=".json" hidden>
+</div>
+
+<script>
+(function(){
+const root=document.getElementById("app"), KEY="life_design_companion_v2";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"journal":[],"areas":[],"experiments":[],"design":{}}');
+const $=id=>document.getElementById(id);
+const today=new Date().toISOString().slice(0,10);
+["qDate","jDate","aDate"].forEach(id=>$(id).value=today);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const clamp=n=>Math.max(0,Math.min(10,Number(n)||0));
+function persist(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function nav(screen){root.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.screen===screen));root.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===screen))}
+root.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>nav(b.dataset.screen)));
+
+$("quickForm").addEventListener("submit",e=>{e.preventDefault();data.journal.unshift({date:$("qDate").value,activity:$("qActivity").value,context:"",hours:0,energy:clamp($("qEnergy").value),engagement:clamp($("qEngagement").value),why:$("qWhy").value,tags:"Quick"});e.target.reset();$("qDate").value=today;$("qEnergy").value=5;$("qEngagement").value=5;persist()});
+$("journalForm").addEventListener("submit",e=>{e.preventDefault();data.journal.unshift({date:$("jDate").value,activity:$("jActivity").value,context:$("jContext").value,hours:Number($("jHours").value)||0,energy:clamp($("jEnergy").value),engagement:clamp($("jEngagement").value),why:$("jWhy").value,tags:$("jTags").value});e.target.reset();$("jDate").value=today;$("jEnergy").value=5;$("jEngagement").value=5;persist()});
+$("areaForm").addEventListener("submit",e=>{e.preventDefault();data.areas.unshift({date:$("aDate").value,area:$("aArea").value,rating:clamp($("aRating").value),trend:$("aTrend").value,working:$("aWorking").value,constraint:$("aConstraint").value});e.target.reset();$("aDate").value=today;persist()});
+$("experimentForm").addEventListener("submit",e=>{e.preventDefault();data.experiments.unshift({date:today,possibility:$("ePossibility").value,experiment:$("eExperiment").value,result:$("eResult").value,learned:$("eLearned").value,next:$("eNext").value});e.target.reset();persist()});
+
+const designPrompts=[
+["workview","Workview","What do you believe work is for? What makes work worthwhile? What do you need from work?"],
+["lifeview","Lifeview","What makes life meaningful to you? What values, relationships, contributions, or experiences matter?"],
+["compass","Compass","What principles or values do you want your choices to honor? Where do Workview and Lifeview align or conflict?"],
+["mindmap","Mind Map","List interests, skills, experiences, people, problems, curiosities, and unexpected combinations. Follow interesting connections."],
+["odysseyA","Odyssey Plan A","Describe one genuinely possible five-year future. Include what happens along the way and what you would learn."],
+["odysseyB","Odyssey Plan B","Describe a substantially different five-year future. Make it different enough to reveal another possibility."],
+["odysseyC","Odyssey Plan C","Describe a third five-year future, especially one that challenges an assumption about what your life has to look like."],
+["reflection","Reflection","What themes are appearing across your observations and possible futures? What assumptions need testing?"]
+];
+function renderDesign(){ $("designFields").innerHTML=designPrompts.map(p=>`<label>${p[1]}<div class="muted">${p[2]}</div><textarea data-design="${p[0]}" placeholder="Write here...">${esc(data.design[p[0]]||"")}</textarea></label>`).join("") }
+root.addEventListener("input",e=>{if(e.target.dataset.design){data.design[e.target.dataset.design]=e.target.value;localStorage.setItem(KEY,JSON.stringify(data))}});
+root.addEventListener("click",e=>{const b=e.target.closest("[data-delete]");if(!b)return;const type=b.dataset.delete;data[type].splice(Number(b.dataset.i),1);persist()});
+
+function render(){
+let t=data.journal.filter(x=>x.date===today);
+let avg=k=>t.length?(t.reduce((s,x)=>s+x[k],0)/t.length).toFixed(1):"—";
+$("todayStats").innerHTML=[["Observations",t.length],["Energy",avg("energy")],["Engagement",avg("engagement")]].map(x=>`<div><div class="muted">${x[0]}</div><div class="big">${x[1]}</div></div>`).join("");
+
+$("journalList").innerHTML=data.journal.length?data.journal.slice(0,40).map((x,i)=>`<div class="entry"><b>${esc(x.activity)}</b><span class="pill">${esc(x.date)}</span><div class="muted">${esc(x.context)} ${x.tags?"• "+esc(x.tags):""}</div><div class="metric"><span>Energy</span><b>${x.energy}/10</b></div><div class="bar"><i style="width:${x.energy*10}%"></i></div><div class="metric"><span>Engagement</span><b>${x.engagement}/10</b></div><div class="bar"><i style="width:${x.engagement*10}%"></i></div><p>${esc(x.why)}</p><button data-delete="journal" data-i="${i}">Delete</button></div>`).join(""):"<div class='muted'>No observations yet.</div>";
+
+let all=data.journal, avgAll=k=>all.length?(all.reduce((s,x)=>s+x[k],0)/all.length).toFixed(1):"—";
+$("overallStats").innerHTML=[["Entries",all.length],["Avg energy",avgAll("energy")],["Avg engagement",avgAll("engagement")]].map(x=>`<div><div class="muted">${x[0]}</div><div class="big">${x[1]}</div></div>`).join("");
+
+let groups={};all.forEach(x=>{let k=x.activity.trim();if(!k)return;(groups[k]??=[]).push(x)});
+let gp=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).slice(0,12);
+$("activityPatterns").innerHTML=gp.length?gp.map(([name,arr])=>{let e=arr.reduce((s,x)=>s+x.energy,0)/arr.length,g=arr.reduce((s,x)=>s+x.engagement,0)/arr.length;return `<div class="entry"><b>${esc(name)}</b><span class="pill">${arr.length} entries</span><div class="muted">Energy ${e.toFixed(1)} · Engagement ${g.toFixed(1)}</div><div class="bar"><i style="width:${e*10}%"></i></div></div>`}).join(""):"<div class='muted'>Add more journal entries to reveal activity patterns.</div>";
+
+$("areaList").innerHTML=data.areas.length?data.areas.slice(0,20).map((x,i)=>`<div class="entry"><b>${esc(x.area)}</b><span class="pill">${esc(x.date)}</span><span class="pill">${x.rating}/10</span><span class="pill">${esc(x.trend)}</span><p>${esc(x.working)}</p><p>${esc(x.constraint)}</p><button data-delete="areas" data-i="${i}">Delete</button></div>`).join(""):"<div class='muted mt-3'>No area check-ins yet.</div>";
+
+$("experimentList").innerHTML=data.experiments.length?data.experiments.map((x,i)=>`<div class="entry"><b>${esc(x.possibility)}</b><span class="pill">${esc(x.date)}</span><p><b>Experiment:</b> ${esc(x.experiment)}</p><p><b>Result:</b> ${esc(x.result)}</p><p><b>Learning:</b> ${esc(x.learned)}</p><p><b>Next:</b> ${esc(x.next)}</p><button data-delete="experiments" data-i="${i}">Delete</button></div>`).join(""):"<div class='muted'>No experiments yet.</div>";
+renderDesign();
+}
+$("backupBtn").addEventListener("click",()=>{
+let choice=prompt("Type EXPORT to download a backup, or IMPORT to restore one.","EXPORT");
+if(!choice)return;
+if(choice.toUpperCase()==="EXPORT"){let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="life-design-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+else if(choice.toUpperCase()==="IMPORT")$("importFile").click();
+});
+$("importFile").addEventListener("change",e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.journal||!x.experiments||!x.design)throw Error();data=x;persist();alert("Backup restored.")}catch(_){alert("That file does not look like a Life Design backup.")}};r.readAsText(f);e.target.value=""});
+render();
+})();
+</script>
+</body>
+</html>
